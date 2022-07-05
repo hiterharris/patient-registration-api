@@ -50,13 +50,7 @@ server.post("/users/add", async (req, res) => {
             "dateOfBirth": body["dateOfBirth"],
             "phone": body["phone"],
             "email": body["email"],
-            "address": body[{
-                "addressLine1": body["addressLine1"],
-                "addressLine2": body["addressLine2"],
-                "city": body["city"],
-                "state": body["state"],
-                "zip": body["zip"],
-            }],
+            "address": body["address"],
             "photoId": body["photoId"],
             "registrationTime": body[Date.now()],
         }
