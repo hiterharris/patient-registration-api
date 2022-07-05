@@ -41,18 +41,23 @@ server.get("/users/all", (req, res) => {
 });
 
 server.post("/users/add", async (req, res) => {
+    const registrationTime = new Date(Date.now());
     var body = req.body;
     var params = {
         TableName: tableName,
         Item: {
             "userId": uuidv4(),
+            "registrationTime": registrationTime.toString(),
             "name": body["name"],
             "dateOfBirth": body["dateOfBirth"],
             "phone": body["phone"],
             "email": body["email"],
-            "address": body["address"],
+            "addressLine1": body["addressLine1"],
+            "addressLine2": body["addressLine2"],
+            "city": body["city"],
+            "state": body["state"],
+            "zip": body["zip"],
             "photoId": body["photoId"],
-            "registrationTime": Date.now(),
         }
     };
 
