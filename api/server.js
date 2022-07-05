@@ -52,7 +52,7 @@ server.post("/users/add", async (req, res) => {
             "email": body["email"],
             "address": body["address"],
             "photoId": body["photoId"],
-            "registrationTime": body[Date.now()],
+            "registrationTime": Date.now(),
         }
     };
 
