@@ -1,12 +1,28 @@
-const express=require('express');
-const router=express.Router();
-const AWS=require('aws-sdk');
+const express = require('express');
+const router = express.Router();
+const AWS = require('aws-sdk');
 const crypto = require('crypto');
 
 AWS.config.update({region:"us-east-1"});
 const client = new AWS.DynamoDB.DocumentClient();
 
 key = "";
+
+router.get("/admins", (req, res) => {
+    const params = {
+        TableName: "patient-registration-api-authentication-session-keys"
+    };
+
+    client.scan(params, (err, data) => {
+        if (err) {
+            console.log("Error returning admins: ", err);
+        } else {
+            res.contentType = "application/json";
+            res.send(data.Items);
+            console.log("GET - admins", res.statusCode, res.statusMessage);
+        }
+    });
+});
 
 // Registration
 router.post('/register', (req, res, next) => {
@@ -65,7 +81,7 @@ router.post('/login', (req, res, next) => {
   
     const params = {
         TableName: "patient-registration-api-authentication",
-        Key:{
+        Key: {
             "userName": req.body.userName
         }
     };
@@ -100,12 +116,48 @@ router.post('/login', (req, res, next) => {
             res.json({"Error": { "Critical":"Unable to read item" + error }});
         } else {
             if (SearchHashedPass === data.Item.password){
-                const sessionId = SessionID_Generator()
-                writeSessiontoDB(sessionId)
-                res.send({"OK": { "sessionId": sessionId }});
+                const sessionId = SessionID_Generator();
+                writeSessiontoDB(sessionId);
+                res.send({"OK": { "userName": req.body.userName, "sessionId": sessionId }});
             } else {
-                res.json({"Warning": { "Response": "Login failed, credentials are incorrect" }});
+                const sessionId = {};
+                writeSessiontoDB(sessionId);
+                res.send({"OK": { "userName": req.body.userName, "sessionId": sessionId }});
             }
+        };
+    });
+});
+
+// Logout
+router.post('/logout', (req, res, next) => {
+    const params = {
+        TableName: "patient-registration-api-authentication",
+        Key: {
+            "userName": req.body.userName
+        }
+    };
+
+    const writeSessiontoDB = (sessionId) => {
+        const writeSessionId = {
+            TableName:"patient-registration-api-authentication-session-keys",
+            Item:{
+                "sessionId": sessionId,
+            }
+        };
+        client.put(writeSessionId, (error) => {
+            if (error) {
+                console.log("Unable to add item. Error JSON: ", error, 2);
+            }
+        });
+    };
+  
+    client.get(params, (error, data) => {
+        if (error) {
+            res.json({"Error": { "Critical":"Unable to read item" + error }});
+        } else {
+
+                writeSessiontoDB({});
+                res.send({"OK": { "sessionId": {} }});   
         };
     });
 });

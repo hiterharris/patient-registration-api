@@ -14,7 +14,7 @@ server.use(cors());
 server.use(bodyParser.json());
 
 server.get('/', (req, res) => {
-  res.send("Users API Endpoint");
+    res.send("Users API Endpoint");
 });
 
 server.use('/api/users', UsersRouter);
